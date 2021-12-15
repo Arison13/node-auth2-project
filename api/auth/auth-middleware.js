@@ -32,7 +32,7 @@ const only = role_name => (req, res, next) => {
 }
 
 
-const checkUsernameExists = (req, res, next) => {
+const checkUsernameExists = async (req, res, next) => {
   /*
     If the username in req.body does NOT exist in the database
     status 401
@@ -40,6 +40,13 @@ const checkUsernameExists = (req, res, next) => {
       "message": "Invalid credentials"
     }
   */
+ const validUsername = req.body
+ if(!validUsername){
+   next({status:401, message:"Invalid credentials"})
+ }
+ else{
+   next()
+ }
 }
 
 
@@ -62,6 +69,20 @@ const validateRoleName = (req, res, next) => {
       "message": "Role name can not be longer than 32 chars"
     }
   */
+ const role_name = req.body.role_name
+ if(!role_name || role_name.trim().length < 1) {
+   req.body.role_name = 'student'
+   next()
+ }else if (role_name.trim() === 'admin'){
+   next({status:422, message:'Role name can not be admin'})
+ }else if(role_name.trim().length > 32) {
+   next({status:422, message:"Role name can not be longer than 32 chars"})
+ }else{
+   req.body.role_name = role_name.trim()
+   next()
+ }
+
+
 }
 
 module.exports = {
